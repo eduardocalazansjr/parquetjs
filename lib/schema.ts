@@ -172,6 +172,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     if (typeDef.originalType === 'DECIMAL') {
       // Default scale to 0 per https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#decimal
       if (typeof opts.scale === "undefined") opts.scale = 0;
+      if (opts.precision && opts.precision > 18) opts.precision = 18
       fieldErrors = fieldErrors.concat(errorsForDecimalOpts(typeDef.originalType, opts, nameWithPath));
     }
 
