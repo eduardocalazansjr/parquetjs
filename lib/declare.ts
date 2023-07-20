@@ -177,8 +177,8 @@ export declare class PageHeader {
   }
 
   export interface ClientS3 {
-    accessKeyId: string,
-    secretAccessKey: string,
+    accessKeyId: string | undefined,
+    secretAccessKey: string | undefined,
     headObject: (params: ClientParameters) => PromiseS3
     getObject: (args: any) => PromiseS3
 }
