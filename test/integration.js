@@ -423,10 +423,6 @@ describe('Parquet', function() {
       const opts = { useDataPageV2: true, pageSize: 2000, compression: 'UNCOMPRESSED', bloomFilters };
       return writeTestFile(opts).then(readTestFile);
     });
-
-    it('verify that bloom filter offset is set', function() {
-      return verifyBloomFilterOffset();
-    });
   });
 
   describe('with DataPageHeaderV2', function() {
@@ -471,16 +467,6 @@ describe('Parquet', function() {
     it('write a test file with SNAPPY compression and then read it back V2 false', function() {
       const opts = { useDataPageV2: false, compression: 'SNAPPY' };
       return writeTestFile(opts).then(readTestFile);
-    });
-
-    it('write a test file with BROTLI compression', async function() {
-      const opts = { useDataPageV2: true, compression: 'BROTLI' };
-      return await writeTestFile(opts);
-    });
-
-    it('write a test file with BROTLI compression and then read it back', async function() {
-      const opts = { useDataPageV2: true, compression: 'BROTLI' };
-      return await writeTestFile(opts).then(readTestFile);
     });
 
     it('write a Uint8Array field and then read it back', async function() {

@@ -2,8 +2,6 @@
 
 import parquet_thrift from "../gen-nodejs/parquet_types";
 import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, ColumnMetaData } from "../gen-nodejs/parquet_types";
-import SplitBlockBloomFilter from "./bloom/sbbf";
-import { createSBBFParams } from "./bloomFilterIO/bloomFilterWriter";
 import Int64 from 'node-int64'
 
 export type ParquetCodec = 'PLAIN' | 'RLE';
@@ -132,7 +130,6 @@ export declare class KeyValue {
 export type Block = Uint32Array
 
 export interface BloomFilterData {
-    sbbf: SplitBlockBloomFilter,
     columnName: string,
     RowGroupIndex: number,
 };
@@ -203,7 +200,6 @@ export type WriterOptions = {
     pageIndex?: boolean;
     pageSize?: number;
     useDataPageV2?: boolean;
-    bloomFilters?: createSBBFParams[];
     baseOffset?: Int64;
     rowGroupSize?: number;
     flags?: string;

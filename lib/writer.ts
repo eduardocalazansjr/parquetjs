@@ -5,12 +5,10 @@ import * as parquet_util from './util'
 import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
-import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
 import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page } from './declare'
 import { Options } from './codec/types'
 import { ParquetSchema } from './schema'
 import Int64 from 'node-int64'
-import SplitBlockBloomFilter from './bloom/sbbf'
 
 /**
  * Parquet File Magic String
@@ -106,7 +104,6 @@ export class ParquetWriter {
 
     const options = {
       useDataPageV2: this.envelopeWriter.useDataPageV2,
-      bloomFilters: this.envelopeWriter.bloomFilters
     };
     if (this.rowBuffer.pageRowCount! >= this.envelopeWriter.pageSize) {
       await encodePages(this.schema, this.rowBuffer, options);
@@ -134,14 +131,13 @@ export class ParquetWriter {
 
     if (this.envelopeWriter) {
       if (this.rowBuffer.rowCount! > 0 || this.rowBuffer.rowCount! >= this.rowGroupSize) {
-        await encodePages(this.schema, this.rowBuffer, { useDataPageV2: this.envelopeWriter.useDataPageV2, bloomFilters: this.envelopeWriter.bloomFilters});
+        await encodePages(this.schema, this.rowBuffer, { useDataPageV2: this.envelopeWriter.useDataPageV2});
 
         await this.envelopeWriter.writeRowGroup(this.rowBuffer);
         this.rowBuffer = {};
       }
 
 
-      await this.envelopeWriter.writeBloomFilters();
       await this.envelopeWriter.writeIndex();
       await this.envelopeWriter.writeFooter(this.userMetadata);
       await this.envelopeWriter.close();
@@ -196,7 +192,6 @@ export class ParquetEnvelopeWriter {
   pageSize: number;
   useDataPageV2: boolean;
   pageIndex: boolean;
-  bloomFilters: Record<string, SplitBlockBloomFilter> // TODO: OR filterCollection
 
   /**
    * Create a new parquet envelope writer that writes to the specified stream
@@ -217,11 +212,6 @@ export class ParquetEnvelopeWriter {
     this.pageSize =  opts.pageSize || PARQUET_DEFAULT_PAGE_SIZE;
     this.useDataPageV2 = ("useDataPageV2" in opts) ? opts.useDataPageV2! : true;
     this.pageIndex = opts.pageIndex!;
-    this.bloomFilters = {};
-
-    (opts.bloomFilters || []).forEach(bloomOption => {
-      this.bloomFilters[bloomOption.column] = bloomFilterWriter.createSBBF(bloomOption)
-    });
   }
 
   writeSection(buf: Buffer) {
@@ -254,22 +244,6 @@ export class ParquetEnvelopeWriter {
     this.rowCount.setValue(this.rowCount.valueOf() + records.rowCount!);
     this.rowGroups.push(rgroup.metadata);
     return this.writeSection(rgroup.body);
-  }
-
-  writeBloomFilters() {
-    this.rowGroups.forEach(group => {
-      group.columns.forEach(column => {
-        const columnName = column.meta_data?.path_in_schema[0];
-        if (!columnName || columnName in this.bloomFilters === false) return;
-
-        const serializedBloomFilterData =
-          bloomFilterWriter.getSerializedBloomFilterData(this.bloomFilters[columnName]);
-
-        bloomFilterWriter.setFilterOffset(column, this.offset);
-
-        this.writeSection(serializedBloomFilterData);
-      });
-    });
   }
 
   /**
@@ -405,7 +379,7 @@ function encodeStatistics(statistics: parquet_thrift.Statistics,column: ParquetF
   return new parquet_thrift.Statistics(statistics);
 }
 
-async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.RecordBuffer, opts: {bloomFilters: Record<string,SplitBlockBloomFilter>, useDataPageV2: boolean}) {// generic
+async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.RecordBuffer, opts: {useDataPageV2: boolean}) {// generic
   if (!rowBuffer.pageRowCount) {
     return;
   }
@@ -417,11 +391,6 @@ async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.Re
 
     let page;
     const values = rowBuffer.columnData![field.path.join(',')];
-
-    if (opts.bloomFilters && (field.name in opts.bloomFilters)) {
-      const splitBlockBloomFilter = opts.bloomFilters[field.name];
-      values.values!.forEach(v => splitBlockBloomFilter.insert(v));
-    }
 
     let statistics: parquet_thrift.Statistics = {};
     if (field.statistics !== false) {

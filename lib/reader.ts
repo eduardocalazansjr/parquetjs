@@ -7,14 +7,9 @@ import * as parquet_codec from './codec';
 import * as parquet_compression from './compression';
 import * as parquet_types from './types';
 import BufferReader , { BufferReaderOptions } from './bufferReader';
-import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
 import fetch from 'cross-fetch';
 import { ParquetCodec, Parameter,PageData, SchemaDefinition, ParquetType, FieldDefinition, ParquetField, ClientS3, ClientParameters, FileMetaDataExt, NewPageHeader, RowGroupExt, ColumnChunkExt } from './declare';
 import { Cursor, Options } from './codec/types';
-
-const {
-  getBloomFiltersFor,
-} = bloomFilterReader;
 
 /**
  * Parquet File Magic String
@@ -262,15 +257,6 @@ export class ParquetReader {
         this.envelopeReader!,
         this.schema,
         columnList);
-  }
-
-  async getBloomFiltersFor(columnNames: string[]) {
-    const bloomFilterData = await getBloomFiltersFor(columnNames, this.envelopeReader!);
-    return bloomFilterData.reduce((acc: Record<string, typeof bloomFilterData>, value) => {
-      if (acc[value.columnName]) acc[value.columnName].push(value)
-      else acc[value.columnName] = [value]
-      return acc;
-    }, {});
   }
 
   /**
