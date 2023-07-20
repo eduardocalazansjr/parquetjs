@@ -11,6 +11,12 @@ import fetch from 'cross-fetch';
 import { ParquetCodec, Parameter,PageData, SchemaDefinition, ParquetType, FieldDefinition, ParquetField, ClientS3, ClientParameters, FileMetaDataExt, NewPageHeader, RowGroupExt, ColumnChunkExt } from './declare';
 import { Cursor, Options } from './codec/types';
 
+// @ts-ignore
+BigInt.prototype.toJSON = function (): number {
+  // @ts-ignore
+  return this.toString()
+}
+
 /**
  * Parquet File Magic String
  */

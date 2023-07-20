@@ -1,9 +1,9 @@
 {
-  "name": "@vlntdds/parquetjs",
+  "name": "@eduardocalazansjr/parquetjs",
   "description": "fully asynchronous, pure JavaScript implementation of the Parquet file format",
   "main": "dist/parquet.js",
   "types": "dist/parquet.d.ts",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/eduardocalazansjr/parquetjs",
   "license": "MIT",
   "keywords": [
