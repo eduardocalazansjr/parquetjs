@@ -31,7 +31,8 @@ export const PARQUET_LOGICAL_TYPES: ParquetTypeData = {
   },
   'INT64': {
     primitiveType: 'INT64',
-    toPrimitive: toPrimitive_INT64
+    toPrimitive: toPrimitive_INT64,
+    fromPrimitive: fromPrimitive_INT64
   },
   'INT96': {
     primitiveType: 'INT96',
@@ -43,7 +44,8 @@ export const PARQUET_LOGICAL_TYPES: ParquetTypeData = {
   },
   'DOUBLE': {
     primitiveType: 'DOUBLE',
-    toPrimitive: toPrimitive_DOUBLE
+    toPrimitive: toPrimitive_DOUBLE,
+    fromPrimitive: fromPrimitive_DOUBLE
   },
   'BYTE_ARRAY': {
     primitiveType: 'BYTE_ARRAY',
@@ -201,6 +203,7 @@ export function fromPrimitive(type: string | undefined, value: unknown) {
   if (typeFromPrimitive !== undefined) {
     return typeFromPrimitive(value)
   } else {
+    console.log(type)
     return value;
   }
 }
@@ -224,6 +227,16 @@ function toPrimitive_FLOAT(value: number | string) {
 }
 
 function toPrimitive_DOUBLE(value: number | string) {
+  if (typeof value === 'string') {
+    const v = parseFloat(value);
+    return v;
+  } else if (typeof value === 'number') {
+    return value;
+  }
+  throw 'invalid value for DOUBLE: ' + value;
+}
+
+function fromPrimitive_DOUBLE(value: number | string) {
   if (typeof value === 'string') {
     const v = parseFloat(value);
     return v;
@@ -319,6 +332,16 @@ function toPrimitive_INT64(value: number | bigint | string) {
   } catch {
       throw 'invalid value for INT64: ' + value;
   }
+}
+
+function fromPrimitive_INT64(value: number | bigint | string) {
+  if (typeof value === 'string') {
+    const v = parseFloat(value);
+    return v;
+  } else if (typeof value === 'number') {
+    return value;
+  }
+  throw 'invalid value for FLOAT: ' + value;
 }
 
 const MAX_U64 = BigInt('0xffffffffffffffff');
