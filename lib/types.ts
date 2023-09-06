@@ -451,7 +451,7 @@ function toPrimitive_DATE(value: string | Date | number) {
 }
 
 function fromPrimitive_DATE(value: number ) {
-  return new Date(+value * kMillisPerDay);
+  return new Date(+value * kMillisPerDay).toISOString().replace("Z", "");
 }
 
 
@@ -488,8 +488,8 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
 }
 
 function fromPrimitive_TIMESTAMP_MICROS(value: number | bigint) {
-    if (typeof value === 'bigint') return new Date(Number(value / 1000n));
-    return new Date(value / 1000);
+    if (typeof value === 'bigint') return new Date(Number(value / 1000n)).toISOString().replace("Z", "");
+    return new Date(value / 1000).toISOString().replace("Z", "");
   }
 
 function toPrimitive_INTERVAL(value: INTERVAL) {
