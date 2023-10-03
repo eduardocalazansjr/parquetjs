@@ -2,6 +2,7 @@
 // Thanks to https://github.com/kbajalc/parquets for some of the code.
 import * as BSON from "bson"
 import { PrimitiveType, OriginalType, ParquetType } from "./declare"
+import { transformDateToStringByPrimitiveDate, transformDateToStringByPrimitiveTimestampMicros } from "./util";
 
 type ParquetTypeData = {
   [Property in ParquetType]: {
@@ -451,7 +452,8 @@ function toPrimitive_DATE(value: string | Date | number) {
 }
 
 function fromPrimitive_DATE(value: number ) {
-  return new Date(+value * kMillisPerDay);
+  const date =  new Date(+value * kMillisPerDay)
+  return transformDateToStringByPrimitiveDate(date)
 }
 
 
@@ -488,8 +490,12 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
 }
 
 function fromPrimitive_TIMESTAMP_MICROS(value: number | bigint) {
-    if (typeof value === 'bigint') return new Date(Number(value / 1000n));
-    return new Date(value / 1000);
+    if (typeof value === 'bigint') {
+      const date = new Date(Number(value / 1000n))
+      return transformDateToStringByPrimitiveTimestampMicros(date)
+    }
+    const date  = new Date(value / 1000);
+    return transformDateToStringByPrimitiveTimestampMicros(date)
   }
 
 function toPrimitive_INTERVAL(value: INTERVAL) {

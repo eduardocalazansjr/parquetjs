@@ -213,3 +213,11 @@ export const fieldIndexOf = function(arr: Array<Array<unknown>>, elem: Array<unk
 export const cloneInteger = (int: Int64) => {
    return new Int64(int.valueOf());
 };
+
+export const transformDateToStringByPrimitiveDate = (date: Date): string =>{
+  return date.toISOString().split('T')[0]; 
+}
+
+export const transformDateToStringByPrimitiveTimestampMicros = (date: Date): string => {
+  return date.toISOString().replace('T', ' ').replace('Z', '');
+}
