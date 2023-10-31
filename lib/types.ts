@@ -217,14 +217,12 @@ function fromPrimitive_BOOLEAN(value: boolean) {
   return !!value;
 }
 
-function toPrimitive_FLOAT(value: number | string) {
-  if (typeof value === 'string') {
-    const v = parseFloat(value);
-    return v;
-  } else if (typeof value === 'number') {
-    return value;
+function toPrimitive_FLOAT(value: string) {
+  try {
+    return parseFloat(value)
+  } catch (_) {
+    return value
   }
-  throw 'invalid value for FLOAT: ' + value;
 }
 
 function toPrimitive_DOUBLE(value: number | string) {
@@ -335,14 +333,12 @@ function toPrimitive_INT64(value: number | bigint | string) {
   }
 }
 
-function fromPrimitive_INT64(value: number | bigint | string) {
-  if (typeof value === 'string') {
-    const v = parseFloat(value);
-    return v;
-  } else if (typeof value === 'number') {
-    return value;
+function fromPrimitive_INT64(value: any) {
+  try {
+    return parseFloat(value)
+  } catch (_) {
+    return value
   }
-  throw 'invalid value for FLOAT: ' + value;
 }
 
 const MAX_U64 = BigInt('0xffffffffffffffff');
