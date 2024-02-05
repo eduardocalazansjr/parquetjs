@@ -85,6 +85,16 @@ class ParquetCursor  {
     return this.rowGroup[this.cursorIndex++];
   }
 
+  async * nextByRowGroups(index: number) {
+    const buffer = await this.envelopeReader.readRowGroup(this.schema, this.metadata.row_groups[index], this.columnList)
+    for (const row of parquet_shredder.materializeRecordsV2(this.schema, buffer,  parseInt(this.metadata.row_groups[index].num_rows.toString()))) {
+        yield row
+      }
+      await new Promise((resolve)=>{
+      setTimeout(()=>resolve('success'), 3000)
+      })
+}
+
   /**
    * Rewind the cursor to the beginning of the file
    */
