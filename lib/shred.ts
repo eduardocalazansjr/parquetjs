@@ -241,7 +241,7 @@ export const materializeRecordsV2 = function * (schema: ParquetSchema, buffer: R
           
           const field = schema.findField(k);
           const fieldBranch = schema.findFieldBranch(k);
-          let values3 = columnValues[k].values
+          let values = columnValues[k].values
           let rLevels = new Array(field.rLevelMax + 1);
           rLevels.fill(0);
 
@@ -253,7 +253,7 @@ export const materializeRecordsV2 = function * (schema: ParquetSchema, buffer: R
           
           let value = null;
           if (dLevel === field.dLevelMax) {
-              value = parquet_types.fromPrimitive(field.originalType || field.primitiveType, values3.next().value);
+              value = parquet_types.fromPrimitive(field.originalType || field.primitiveType, values.next().value);
           }
           records[rLevels[0] - 1]= records[rLevels[0] - 1] || {};
           materializeRecordField(records[rLevels[0] - 1], fieldBranch, rLevels.slice(1), dLevel, value);
