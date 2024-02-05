@@ -222,6 +222,47 @@ export const materializeRecords = function(schema: ParquetSchema, buffer: Record
   return records;
 }
 
+
+export const materializeRecordsV2 = function * (schema: ParquetSchema, buffer: RecordBuffer, numRows: number) {
+     
+  let columnValues: any = {}
+
+  for (let k in buffer.columnData) {
+      columnValues = {
+          ...columnValues, 
+          [k]: {values: buffer.columnData[k].values![Symbol.iterator]()}
+  }
+  buffer.columnData[k].values = []
+  }
+
+  for (let i = 0; i < numRows; ++i) {
+      let records: any[] = [];
+      for (let k in buffer.columnData) {
+          
+          const field = schema.findField(k);
+          const fieldBranch = schema.findFieldBranch(k);
+          let values3 = columnValues[k].values
+          let rLevels = new Array(field.rLevelMax + 1);
+          rLevels.fill(0);
+
+          const dLevel = buffer.columnData[k].dlevels![i];
+          const rLevel = buffer.columnData[k].rlevels![i];
+
+          rLevels[rLevel]++;
+          rLevels.fill(0, rLevel + 1);
+          
+          let value = null;
+          if (dLevel === field.dLevelMax) {
+              value = parquet_types.fromPrimitive(field.originalType || field.primitiveType, values3.next().value);
+          }
+          records[rLevels[0] - 1]= records[rLevels[0] - 1] || {};
+          materializeRecordField(records[rLevels[0] - 1], fieldBranch, rLevels.slice(1), dLevel, value);
+
+      }
+      yield records[0]
+  }
+};
+
 function materializeRecordField(record: Record<string, unknown>, branch: Array<ParquetField>, rLevels: Array<number>, dLevel: number, value: Record<string, unknown>) {
   const node = branch[0];
 
