@@ -91,7 +91,7 @@ class ParquetCursor  {
         yield row
       }
       await new Promise((resolve)=>{
-      setTimeout(()=>resolve('success'), 3000)
+      setTimeout(()=>resolve('success'), 8000)
       })
 }
 
