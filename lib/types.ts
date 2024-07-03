@@ -204,7 +204,6 @@ export function fromPrimitive(type: string | undefined, value: unknown) {
   if (typeFromPrimitive !== undefined) {
     return typeFromPrimitive(value)
   } else {
-    console.log(type)
     return value;
   }
 }
